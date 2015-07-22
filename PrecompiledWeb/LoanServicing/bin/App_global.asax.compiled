@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="8" virtualPath="/LoanServicing/global.asax" hash="ffffffffb4711374" filehash="290c5ce9f07" flags="150000" assembly="App_global.asax" type="ASP.global_asax">
+    <filedeps>
+        <filedep name="/LoanServicing/global.asax" />
+    </filedeps>
+</preserve>

@@ -1,0 +1,30 @@
+﻿<%@ master language="C#" masterpagefile="~/Site.master" autoeventwireup="true" inherits="Roles_Administrators_administrator, App_Web_3soxtxnv" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="MenuContent" Runat="Server">
+<asp:Menu ID="NavigationMenu" runat="server" CssClass="menu" EnableViewState="false" IncludeStyleBlock="false" Orientation="Horizontal">
+    <Items>
+        <asp:MenuItem NavigateUrl="Default.aspx" Text="Home"/>
+        <asp:MenuItem NavigateUrl="MyInfo.aspx" Text="My Account"/>
+        <asp:MenuItem Text="Loans">
+            <asp:MenuItem NavigateUrl="Loans.aspx" Text="Loans"/>
+            <asp:MenuItem NavigateUrl="Distributions.aspx" Text="Payment Distributions"/>
+        </asp:MenuItem>
+        <asp:MenuItem NavigateUrl="Borrowers.aspx" Text="Borrowers"/>
+        <asp:MenuItem NavigateUrl="Investors.aspx" Text="Investors"/>
+        <asp:MenuItem NavigateUrl="Servicers.aspx" Text="Servicers"/>
+        <asp:MenuItem Text="Documents">
+            <asp:MenuItem NavigateUrl="Statements/BorrowerLoanStatement.aspx" Text="Borrower Monthly Loan Statement"/>
+            <asp:MenuItem NavigateUrl="Statements/InvestorIncomeStatement.aspx" Text="Investor Income Statement"/>
+            <asp:MenuItem NavigateUrl="Statements/IncomeTaxForms.aspx" Text="Form 1098 & 1099"/>
+            <asp:MenuItem NavigateUrl="Statements/PenaltyNotice.aspx" Text="Penalty Notices"/>
+        </asp:MenuItem>
+    </Items>
+</asp:Menu>
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="MainContent" Runat="Server">
+<asp:ContentPlaceHolder ID="MainContent" runat="server">
+</asp:ContentPlaceHolder>
+</asp:Content>
+
