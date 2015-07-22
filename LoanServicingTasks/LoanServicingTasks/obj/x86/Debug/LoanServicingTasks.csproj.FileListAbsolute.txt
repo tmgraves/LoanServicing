@@ -1,0 +1,13 @@
+c:\users\owner\documents\visual studio 2010\projects\LoanServicingTasks\LoanServicingTasks\bin\Debug\LoanServicingTasks.exe.config
+c:\users\owner\documents\visual studio 2010\projects\LoanServicingTasks\LoanServicingTasks\bin\Debug\LoanServicingTasks.exe
+c:\users\owner\documents\visual studio 2010\projects\LoanServicingTasks\LoanServicingTasks\bin\Debug\LoanServicingTasks.pdb
+c:\users\owner\documents\visual studio 2010\projects\LoanServicingTasks\LoanServicingTasks\obj\x86\Debug\LoanServicingTasks.exe
+c:\users\owner\documents\visual studio 2010\projects\LoanServicingTasks\LoanServicingTasks\obj\x86\Debug\LoanServicingTasks.pdb
+c:\users\owner\documents\visual studio 2010\projects\LoanServicingTasks\LoanServicingTasks\bin\Debug\LoanServicingTasks.exe.manifest
+c:\users\owner\documents\visual studio 2010\projects\LoanServicingTasks\LoanServicingTasks\bin\Debug\LoanServicingTasks.application
+c:\users\owner\documents\visual studio 2010\projects\LoanServicingTasks\LoanServicingTasks\obj\x86\Debug\LoanServicingTasks.exe.manifest
+c:\users\owner\documents\visual studio 2010\projects\LoanServicingTasks\LoanServicingTasks\obj\x86\Debug\LoanServicingTasks.application
+C:\Users\owner\Documents\Visual Studio 2010\Projects\LoanServicingTasks\LoanServicingTasks\obj\x86\Debug\LoanServicingTasks.csprojResolveAssemblyReference.cache
+J:\GitHub\LoanServicing\LoanServicingTasks\LoanServicingTasks\bin\Debug\LoanServicingTasks.exe.config
+J:\GitHub\LoanServicing\LoanServicingTasks\LoanServicingTasks\obj\x86\Debug\LoanServicingTasks.exe
+J:\GitHub\LoanServicing\LoanServicingTasks\LoanServicingTasks\obj\x86\Debug\LoanServicingTasks.pdb

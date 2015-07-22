@@ -1,0 +1,9 @@
+c:\users\owner\documents\visual studio 2010\projects\RunInvestorStatements\RunInvestorStatements\bin\Debug\RunInvestorStatements.exe.config
+c:\users\owner\documents\visual studio 2010\projects\RunInvestorStatements\RunInvestorStatements\bin\Debug\RunInvestorStatements.exe
+c:\users\owner\documents\visual studio 2010\projects\RunInvestorStatements\RunInvestorStatements\bin\Debug\RunInvestorStatements.pdb
+c:\users\owner\documents\visual studio 2010\projects\RunInvestorStatements\RunInvestorStatements\obj\x86\Debug\ResolveAssemblyReference.cache
+c:\users\owner\documents\visual studio 2010\projects\RunInvestorStatements\RunInvestorStatements\obj\x86\Debug\RunInvestorStatements.exe
+c:\users\owner\documents\visual studio 2010\projects\RunInvestorStatements\RunInvestorStatements\obj\x86\Debug\RunInvestorStatements.pdb
+J:\GitHub\LoanServicing\RunInvestorStatements\RunInvestorStatements\bin\Debug\RunInvestorStatements.exe.config
+J:\GitHub\LoanServicing\RunInvestorStatements\RunInvestorStatements\obj\x86\Debug\RunInvestorStatements.exe
+J:\GitHub\LoanServicing\RunInvestorStatements\RunInvestorStatements\obj\x86\Debug\RunInvestorStatements.pdb
