@@ -1,0 +1,38 @@
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="PercentageTextbox.ascx.cs" Inherits="UserControls_PercentageTextbox" %>
+<asp:TextBox ID="tbValue" runat="server" Style="text-align: right;"></asp:TextBox>
+<ajaxToolkit:MaskedEditExtender ID="meeValue" runat="server"
+    TargetControlID="tbValue"
+    Mask="999.99%"
+    AutoCompleteValue="false"
+    MessageValidatorTip="true"
+    OnFocusCssClass="MaskedEditFocus"
+    OnInvalidCssClass="MaskedEditError"
+    MaskType="Number"
+    InputDirection="RightToLeft"
+    AcceptNegative="Left"
+    DisplayMoney="None"
+    ErrorTooltipEnabled="True" />
+<ajaxToolkit:MaskedEditValidator ID="mevValue" runat="server"
+    ControlExtender="meeValue"
+    ControlToValidate="tbValue"
+    IsValidEmpty="false"
+    MaximumValue="100"
+    EmptyValueMessage="Number is required"
+    InvalidValueMessage="Number is invalid"
+    MaximumValueMessage="Number &gt; 100"
+    MinimumValueMessage="Number &lt; 0"
+    MinimumValue="0"
+    Display="Dynamic"
+    TooltipMessage="Input a number from 0 to 100"
+    EmptyValueBlurredText="*"
+    InvalidValueBlurredMessage="*"
+    MaximumValueBlurredMessage="*"
+    MinimumValueBlurredText="*"
+    ValidationGroup="Value" />
+<asp:RequiredFieldValidator ID="rfvValue" runat="server"
+    ControlToValidate="tbValue"
+    Display="dynamic"
+    Enabled="false"
+    ErrorMessage="*Required"
+    ValidationGroup="Value">*
+</asp:RequiredFieldValidator>

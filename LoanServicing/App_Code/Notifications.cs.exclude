@@ -1,0 +1,386 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Data;
+using System.Net.Mail;
+using System.Net.Mime;
+
+/// <summary>
+/// Summary description for Notifications
+/// </summary>
+public class Notifications
+{
+	public Notifications()
+	{
+		//
+		// TODO: Add constructor logic here
+		//
+	}
+
+    private delegate void SendEmailDelegate(System.Net.Mail.MailMessage m);
+
+    private static void SendEmailResponse(IAsyncResult ar)
+    {
+        SendEmailDelegate sd = (SendEmailDelegate)(ar.AsyncState);
+
+        sd.EndInvoke(ar);
+    }
+
+    protected static void SendAsyncEmail(MailMessage m)
+    {
+        //  Send Message
+        SmtpClient smtp = new SmtpClient();
+        //  smtp.EnableSsl = true;
+        SendEmailDelegate sd = new SendEmailDelegate(smtp.Send);
+        AsyncCallback cb = new AsyncCallback(SendEmailResponse);
+        sd.BeginInvoke(m, cb, sd);
+    }
+
+    public static bool SendNewMemberInfo(int organizationMemberId)
+    {
+        try
+        {
+            //  Get Member
+            DataTable dtMember = OrganizationMembersBLL.Get(organizationMemberId).Tables[0];
+            //  Get Organization
+            DataTable dtOrganization = OrganizationsBLL.Get(Convert.ToInt32(dtMember.Rows[0]["OrganizationID"].ToString())).Tables[0];
+
+            MailAddress from = new MailAddress(dtOrganization.Rows[0]["ContactEmail"].ToString(), dtOrganization.Rows[0]["Organization"].ToString());
+            MailAddress to = new MailAddress(dtMember.Rows[0]["Email"].ToString(), dtMember.Rows[0]["FirstName"].ToString() + " " + dtMember.Rows[0]["LastName"].ToString());
+            MailMessage m = new MailMessage(from, to);
+            m.Subject = "Thank you for joining " + dtOrganization.Rows[0]["Organization"].ToString();
+
+            //  Build Message
+            string strMessage = "Hello " + dtMember.Rows[0]["FirstName"].ToString() + ",<br/>" +
+                "Here is your account information for:<br/><br/>" +
+                "<a target='_blank' href='http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Roles/Trainers/Users/Users.aspx'>http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Roles/Trainers/Users/Users.aspx</a><br/><br/>" +
+                "Name: " + dtMember.Rows[0]["FirstName"].ToString() + " " + dtMember.Rows[0]["LastName"].ToString() + "<br/>" +
+                "Email: " + dtMember.Rows[0]["Email"].ToString() + "<br/>" +
+                "Password: " + dtMember.Rows[0]["Password"].ToString() + "<br/><br/>" +
+                dtOrganization.Rows[0]["Organization"].ToString() + "<br/>" +
+                dtOrganization.Rows[0]["Domain"].ToString() + "<br/>" +
+                dtOrganization.Rows[0]["ContactEmail"].ToString();
+            AlternateView avHtml = AlternateView.CreateAlternateViewFromString("<html><body>" + strMessage + "</body></html>", null, MediaTypeNames.Text.Html);
+
+            m.AlternateViews.Add(avHtml);
+            SendAsyncEmail(m);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static bool SendNewMemberNotice(int organizationMemberId)
+    {
+        try
+        {
+            //  Get Member
+            DataTable dtMember = OrganizationMembersBLL.Get(organizationMemberId).Tables[0];
+            //  Get Trainers
+            DataTable dtTrainers = OrganizationMembersBLL.SearchByRole(Convert.ToInt32(dtMember.Rows[0]["OrganizationID"].ToString()), 3).Tables[0];
+            //  Get Organization
+            DataTable dtOrganization = OrganizationsBLL.Get(Convert.ToInt32(dtMember.Rows[0]["OrganizationID"].ToString())).Tables[0];
+
+            foreach (DataRow r in dtTrainers.Rows)
+            {
+                MailAddress from = new MailAddress(dtOrganization.Rows[0]["ContactEmail"].ToString(), dtOrganization.Rows[0]["Organization"].ToString());
+                MailAddress to = new MailAddress(r["Email"].ToString(), r["FirstName"].ToString() + " " + r["LastName"].ToString());
+                MailMessage m = new MailMessage(from, to);
+                m.Subject = "A new member has joined the site!";
+
+                //  Build Message
+                string strMessage = dtMember.Rows[0]["FirstName"].ToString() + " " + dtMember.Rows[0]["LastName"].ToString() + " has joined the site and needs to be assigned to a role(s).<br/>" +
+                    "Click here to set their role: <a target='_blank' href='http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Roles/Trainers/Users/Users.aspx'>http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Roles/Trainers/Users/Users.aspx</a>";
+                AlternateView avHtml = AlternateView.CreateAlternateViewFromString("<html><body>" + strMessage + "</body></html>", null, MediaTypeNames.Text.Html);
+
+                m.AlternateViews.Add(avHtml);
+                SendAsyncEmail(m);
+            }
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static bool SendRoleAssignmentNotice(int organizationMemberId, int organizationMemberRoleId)
+    {
+        try
+        {
+            //  Get Member
+            DataTable dtMember = OrganizationMembersBLL.Get(organizationMemberId).Tables[0];
+            //  Get Organization
+            DataTable dtOrganization = OrganizationsBLL.Get(Convert.ToInt32(dtMember.Rows[0]["OrganizationID"].ToString())).Tables[0];
+            //  Get Role
+            DataTable dtRole = OrganizationMemberRolesBLL.Get(organizationMemberRoleId).Tables[0];
+            MailAddress from = new MailAddress(dtOrganization.Rows[0]["ContactEmail"].ToString(), dtOrganization.Rows[0]["Organization"].ToString());
+            MailAddress to = new MailAddress(dtMember.Rows[0]["Email"].ToString(), dtMember.Rows[0]["FirstName"].ToString() + " " + dtMember.Rows[0]["LastName"].ToString());
+            MailMessage m = new MailMessage(from, to);
+            m.Subject = "You've been added to the role: " + dtRole.Rows[0]["Role"].ToString();
+
+            //  Build Message
+            string strMessage = "You have been added to the role: " + dtRole.Rows[0]["Role"].ToString() + "<br/>" +
+                "Click here to go to the " + dtRole.Rows[0]["Role"].ToString() + " Section: <a target='_blank' href='http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Roles/" + dtRole.Rows[0]["Role"].ToString() + "s/Default.aspx'>http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Roles/" + dtRole.Rows[0]["Role"].ToString() + "s/Default.aspx.aspx</a><br/><br/>" +
+                dtOrganization.Rows[0]["Organization"].ToString() + "<br/>" +
+                dtOrganization.Rows[0]["Domain"].ToString() + "<br/>" +
+                dtOrganization.Rows[0]["ContactEmail"].ToString();
+            AlternateView avHtml = AlternateView.CreateAlternateViewFromString("<html><body>" + strMessage + "</body></html>", null, MediaTypeNames.Text.Html);
+
+            m.AlternateViews.Add(avHtml);
+            SendAsyncEmail(m);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static bool SendPassword(int individualId, int organizationId)
+    {
+        try
+        {
+            //  Get Member
+            DataTable dtIndividual = IndividualsBLL.Get(individualId).Tables[0];
+            //  Get Organization
+            DataTable dtOrganization = OrganizationsBLL.Get(organizationId).Tables[0];
+
+            MailAddress from = new MailAddress(dtOrganization.Rows[0]["ContactEmail"].ToString(), dtOrganization.Rows[0]["Organization"].ToString());
+            MailAddress to = new MailAddress(dtIndividual.Rows[0]["Email"].ToString(), dtIndividual.Rows[0]["FirstName"].ToString() + " " + dtIndividual.Rows[0]["LastName"].ToString());
+            MailMessage m = new MailMessage(from, to);
+            m.Subject = "Your password for " + dtOrganization.Rows[0]["Organization"].ToString();
+
+            //  HTML Version
+            string strMessage = "Here is your password for <a target='_blank' href='http://" + dtOrganization.Rows[0]["Domain"].ToString() + "'>http://" + dtOrganization.Rows[0]["Domain"].ToString() + "</a><br/><br/>" +
+                                dtIndividual.Rows[0]["Password"].ToString() + "<br/><br/>" +
+                                "Thank you,<br/><br/>" +
+                                dtOrganization.Rows[0]["Organization"].ToString() + "<br/>" +
+                                dtOrganization.Rows[0]["ContactEmail"].ToString();
+            AlternateView avHtml = AlternateView.CreateAlternateViewFromString("<html><body>" + strMessage + "</body></html>", null, MediaTypeNames.Text.Html);
+
+            //  Text Version
+            strMessage = "Here is your password for http://" + dtOrganization.Rows[0]["Domain"].ToString() + "\n\n" +
+                    dtIndividual.Rows[0]["Password"].ToString() + "\n\n" +
+                    "Thank you,\n\n" +
+                    dtOrganization.Rows[0]["Organization"].ToString() + "\n" +
+                    dtOrganization.Rows[0]["ContactEmail"].ToString();
+            AlternateView avText = AlternateView.CreateAlternateViewFromString(strMessage, null, MediaTypeNames.Text.Plain);
+
+            //  Add Views
+            m.AlternateViews.Add(avHtml);
+            m.AlternateViews.Add(avText);
+            SendAsyncEmail(m);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static bool NewInquiry(int inquiryId)
+    {
+        try
+        {
+            //  Get Inquiry
+            DataTable dtInquiry = InquiriesBLL.GetInquiry(inquiryId).Tables[0];
+
+            if (!Convert.ToBoolean(dtInquiry.Rows[0]["AdminInquiry"].ToString()))
+            {
+                //  Set Parent
+                DataTable dtParent;
+                if (dtInquiry.Rows[0]["ParentInquiryID"].Equals(DBNull.Value))
+                {
+                    dtParent = dtInquiry;
+                }
+                else
+                {
+                    dtParent = InquiriesBLL.GetInquiry(Convert.ToInt32(dtInquiry.Rows[0]["ParentInquiryID"].ToString())).Tables[0];
+                }
+
+                //  Get Contacts
+                DataTable dtContacts = InquiriesBLL.GetHelpTopicContacts(Convert.ToInt32(dtParent.Rows[0]["HelpTopicID"].ToString())).Tables[0];
+
+                //  Get Organization
+                DataTable dtOrganization = OrganizationsBLL.Get(Convert.ToInt32(dtInquiry.Rows[0]["OrganizationID"].ToString())).Tables[0];
+
+                foreach (DataRow r in dtContacts.Rows)
+                {
+                    MailAddress from = new MailAddress(dtOrganization.Rows[0]["ContactEmail"].ToString(), dtOrganization.Rows[0]["Organization"].ToString());
+                    MailAddress to = new MailAddress(r["Email"].ToString(), r["FirstName"].ToString() + " " + r["LastName"].ToString());
+                    MailMessage m = new MailMessage(from, to);
+                    m.Subject = dtOrganization.Rows[0]["Organization"].ToString() + ": A User has posted a Question";
+
+                    //  Build Message
+                    string strMessage = dtInquiry.Rows[0]["FirstName"].ToString() + " " + dtInquiry.Rows[0]["LastName"].ToString() + " posted this inquiry:<br/>" +
+                        "Topic: " + dtInquiry.Rows[0]["Topic"].ToString() + "<br/>" +
+                        "Question/Comment: " + dtInquiry.Rows[0]["Comments"].ToString() + "<br/>" +
+                        "Click here to view respond: <a target='_blank' href='http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Roles/Trainers/Inquiries/Inquiries.aspx?iid=" + dtParent.Rows[0]["InquiryID"].ToString() + "'>http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Roles/Trainers/Inquiries/Inquiries.aspx?iid=" + inquiryId.ToString() + "</a>";
+                    AlternateView avHtml = AlternateView.CreateAlternateViewFromString("<html><body>" + strMessage + "</body></html>", null, MediaTypeNames.Text.Html);
+
+                    m.AlternateViews.Add(avHtml);
+                    SendAsyncEmail(m);
+                }
+                return true;
+            }
+            else
+            {
+                //  Get Organization
+                DataTable dtOrganization = OrganizationsBLL.Get(Convert.ToInt32(dtInquiry.Rows[0]["OrganizationID"].ToString())).Tables[0];
+
+                //  Get Contacts
+                DataTable dtContact = InquiriesBLL.GetInquiry(Convert.ToInt32(dtInquiry.Rows[0]["ParentInquiryID"].ToString())).Tables[0];
+
+                MailAddress from = new MailAddress(dtOrganization.Rows[0]["ContactEmail"].ToString(), dtOrganization.Rows[0]["Organization"].ToString());
+                MailAddress to = new MailAddress(dtContact.Rows[0]["Email"].ToString(), dtContact.Rows[0]["FirstName"].ToString() + " " + dtContact.Rows[0]["LastName"].ToString());
+                MailMessage m = new MailMessage(from, to);
+                m.Subject = dtOrganization.Rows[0]["Organization"].ToString() + ": A response was posted for your Comment/Question";
+
+                //  Build Message
+                string strMessage = dtInquiry.Rows[0]["FirstName"].ToString() + " " + dtInquiry.Rows[0]["LastName"].ToString() + " posted this reply:<br/>" +
+                    "Topic: " + dtContact.Rows[0]["Topic"].ToString() + "<br/>" +
+                    "Original Question/Comment: " + dtContact.Rows[0]["Comments"].ToString() + "<br/>" +
+                    "Reply: " + dtInquiry.Rows[0]["Comments"].ToString() + "<br/>" +
+                    "Click here to view respond: <a target='_blank' href='http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Help.aspx?iid=" + Utilities.EncryptID(Convert.ToInt32(dtInquiry.Rows[0]["ParentInquiryID"].ToString())) + "'>http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Help.aspx?iid=" + Utilities.EncryptID(Convert.ToInt32(dtInquiry.Rows[0]["ParentInquiryID"].ToString())) + "</a>";
+                AlternateView avHtml = AlternateView.CreateAlternateViewFromString("<html><body>" + strMessage + "</body></html>", null, MediaTypeNames.Text.Html);
+
+                m.AlternateViews.Add(avHtml);
+                SendAsyncEmail(m);
+
+                return true;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static bool NewEventAttendee(int eventAttendeeId)
+    {
+        try
+        {
+            //  Get Attendee
+            DataTable dtAttendee = EventsBLL.GetAttendee(eventAttendeeId).Tables[0];
+            //  Get Organization
+            DataTable dtOrganization = OrganizationsBLL.Get(Convert.ToInt32(dtAttendee.Rows[0]["OrganizationID"].ToString())).Tables[0];
+
+            MailAddress from = new MailAddress(dtOrganization.Rows[0]["ContactEmail"].ToString(), dtOrganization.Rows[0]["Organization"].ToString());
+            MailAddress to = new MailAddress(dtAttendee.Rows[0]["Email"].ToString(), dtAttendee.Rows[0]["FirstName"].ToString() + " " + dtAttendee.Rows[0]["LastName"].ToString());
+            MailMessage m = new MailMessage(from, to);
+            m.Subject = "You've been invited to an Event at " + dtOrganization.Rows[0]["Organization"].ToString();
+
+            //  HTML Version
+            string strMessage = "<b>Event:</b> " + dtAttendee.Rows[0]["EventName"].ToString() + "<br/>" +
+                                "<b>Description:</b> " + dtAttendee.Rows[0]["Description"].ToString() + "<br/>" +
+                                "<b>Date:</b> " + Convert.ToDateTime(dtAttendee.Rows[0]["EventStart"].ToString()).ToShortDateString() + "<br/>" +
+                                "<b>Time:</b> " + Convert.ToDateTime(dtAttendee.Rows[0]["EventStart"].ToString()).ToShortTimeString() + "<br/>" +
+                                "<b>Contact Number:</b> " + dtAttendee.Rows[0]["ContactNumber"].ToString() + "<br/>" +
+                                "Click here to View Event: <a target='_blank' href='http://" + dtOrganization.Rows[0]["Domain"].ToString() + "?page=" + HttpUtility.UrlEncode("Events.aspx?eid=" + dtAttendee.Rows[0]["EventID"].ToString()) + "'>http://" + dtOrganization.Rows[0]["Domain"].ToString() + "?page=" + HttpUtility.UrlEncode("Events.aspx?eid=" + dtAttendee.Rows[0]["EventID"].ToString()) + "</a><br/><br/>" +
+                                "Thank you,<br/><br/>" +
+                                dtOrganization.Rows[0]["Organization"].ToString() + "<br/>" +
+                                dtOrganization.Rows[0]["ContactEmail"].ToString();
+            AlternateView avHtml = AlternateView.CreateAlternateViewFromString("<html><body>" + strMessage + "</body></html>", null, MediaTypeNames.Text.Html);
+
+            //  Text Version
+            strMessage = "Event: " + dtAttendee.Rows[0]["EventName"].ToString() + "\n" +
+                    "Description: " + dtAttendee.Rows[0]["Description"].ToString() + "\n" +
+                    "Date: " + Convert.ToDateTime(dtAttendee.Rows[0]["EventStart"].ToString()).ToShortDateString() + "\n" +
+                    "Time: " + Convert.ToDateTime(dtAttendee.Rows[0]["EventStart"].ToString()).ToShortTimeString() + "\n" +
+                    "Contact Number: " + dtAttendee.Rows[0]["ContactNumber"].ToString() + "\n" +
+                    "Open this link to View Event: http://" + dtOrganization.Rows[0]["Domain"].ToString() + "?page=" + HttpUtility.UrlEncode("Events.aspx?eid=" + dtAttendee.Rows[0]["EventID"].ToString()) + "\n\n" +
+                    "Thank you,\n\n" +
+                    dtOrganization.Rows[0]["Organization"].ToString() + "\n" +
+                    dtOrganization.Rows[0]["ContactEmail"].ToString();
+            AlternateView avText = AlternateView.CreateAlternateViewFromString(strMessage, null, MediaTypeNames.Text.Plain);
+
+            //  Add Views
+            m.AlternateViews.Add(avHtml);
+            m.AlternateViews.Add(avText);
+            SendAsyncEmail(m);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static bool NewPrivateTopic(int topicID)
+    {
+        try
+        {
+            //  Topic Record
+            DataTable dtTopic = ForumsBLL.GetTopic(topicID).Tables[0];
+            //  Organization
+            DataTable dtOrganization = OrganizationsBLL.Get(Convert.ToInt32(dtTopic.Rows[0]["OrganizationID"].ToString())).Tables[0];
+            //  Forum Members
+            DataTable dtIndividuals = ForumsBLL.GetIndividuals(topicID, Convert.ToInt32(dtTopic.Rows[0]["OrganizationID"].ToString())).Tables[0];
+
+            foreach (DataRow r in dtIndividuals.Rows)
+            {
+                MailAddress from = new MailAddress(dtOrganization.Rows[0]["ContactEmail"].ToString(), dtOrganization.Rows[0]["Organization"].ToString());
+                MailAddress to = new MailAddress(r["Email"].ToString(), r["FirstName"].ToString() + " " + r["LastName"].ToString());
+                MailMessage m = new MailMessage(from, to);
+                m.Subject = dtOrganization.Rows[0]["Organization"].ToString() + ": A New Forum Topic has been Posted";
+
+                //  Build Message
+                string strMessage = dtTopic.Rows[0]["FirstName"].ToString() + " posted this Private Forum Topic:<br/>" +
+                    "Topic: \"" + dtTopic.Rows[0]["Title"].ToString() + "\"<br/>" +
+                    "Click here to view the Forum: <a target='_blank' href='http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Forums.aspx?tid=" + topicID.ToString() + "'>http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Forums.aspx?tid=" + topicID.ToString() + "</a>";
+                AlternateView avHtml = AlternateView.CreateAlternateViewFromString("<html><body>" + strMessage + "</body></html>", null, MediaTypeNames.Text.Html);
+
+                m.AlternateViews.Add(avHtml);
+                SendAsyncEmail(m);
+            }
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static bool NewForumReply(int topicReplyID)
+    {
+        try
+        {
+            //  Topic Record
+            DataTable dtReply = ForumsBLL.GetReply(topicReplyID).Tables[0];
+            //  Organization
+            DataTable dtOrganization = OrganizationsBLL.Get(Convert.ToInt32(dtReply.Rows[0]["OrganizationID"].ToString())).Tables[0];
+            //  Forum Members
+            DataTable dtIndividuals = ForumsBLL.GetIndividuals(Convert.ToInt32(dtReply.Rows[0]["TopicID"].ToString()), Convert.ToInt32(dtReply.Rows[0]["OrganizationID"].ToString())).Tables[0];
+
+            foreach (DataRow r in dtIndividuals.Rows)
+            {
+                MailAddress from = new MailAddress(dtOrganization.Rows[0]["ContactEmail"].ToString(), dtOrganization.Rows[0]["Organization"].ToString());
+                MailAddress to = new MailAddress(r["Email"].ToString(), r["FirstName"].ToString() + " " + r["LastName"].ToString());
+                MailMessage m = new MailMessage(from, to);
+                m.Subject = dtOrganization.Rows[0]["Organization"].ToString() + ": A Forum Reply has been Posted";
+
+                //  Build Message
+                string strMessage = dtReply.Rows[0]["FirstName"].ToString() + " posted this Reply to Forum, " + dtReply.Rows[0]["Title"].ToString() + ":<br/>" +
+                    "Reply: \"" + dtReply.Rows[0]["Reply"].ToString() + "\"<br/>" +
+                    "Click here to view the Forum: <a target='_blank' href='http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Forums.aspx?tid=" + dtReply.Rows[0]["TopicID"].ToString() + "'>http://" + dtOrganization.Rows[0]["Domain"].ToString() + "/Forums.aspx?tid=" + dtReply.Rows[0]["TopicID"].ToString() + "</a>";
+                AlternateView avHtml = AlternateView.CreateAlternateViewFromString("<html><body>" + strMessage + "</body></html>", null, MediaTypeNames.Text.Html);
+
+                m.AlternateViews.Add(avHtml);
+                SendAsyncEmail(m);
+            }
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}

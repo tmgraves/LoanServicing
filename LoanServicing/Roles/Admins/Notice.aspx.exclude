@@ -1,0 +1,25 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Roles/Admins/administrator.master" AutoEventWireup="true" CodeFile="Notice.aspx.cs" Inherits="Roles_Admins_Notice" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" Runat="Server">
+<rsweb:reportviewer ID="rvNotices" runat="server" Font-Names="Verdana" 
+    Font-Size="8pt" InteractiveDeviceInfos="(Collection)" 
+    Width="100%"
+    Height="100%"
+    WaitMessageFont-Names="Verdana" WaitMessageFont-Size="14pt">
+    <LocalReport ReportPath="Reports\PenaltyNotice.rdlc">
+        <DataSources>
+            <rsweb:ReportDataSource DataSourceId="odsPenalty" Name="PenaltyDS" />
+        </DataSources>
+    </LocalReport>
+</rsweb:reportviewer>
+<asp:ObjectDataSource ID="odsPenalty" runat="server" 
+    SelectMethod="GetPenalty" 
+    TypeName="LoansBLL">
+    <SelectParameters>
+        <asp:Parameter Name="PenaltyID" Type="Int32" DefaultValue="11" />
+        <asp:Parameter Name="LoanID" Type="Int32" DefaultValue="2" />
+    </SelectParameters>
+</asp:ObjectDataSource>
+
+</asp:Content>
+
